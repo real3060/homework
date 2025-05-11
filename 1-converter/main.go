@@ -1,23 +1,123 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
-const USD, EUR float32 = 0.88, 80.50
+const USDtoEUR, USDtoRUB float64 = 0.88, 80.50
 
 func main() {
-	var usdTOrub, usdTOeur, eurTOrub = 10, 15, 20
-
-	fmt.Printf("долларов %v в евро: %v \n", usdTOeur, usdToEur(usdTOeur))
-	fmt.Printf("долларов %v в рубли: %v \n", usdTOrub, usdToRub(usdTOrub))
-	fmt.Printf("евро %v в рубли: %v \n", eurTOrub, eurToRub(eurTOrub))
+	getMenu()
 }
 
-func usdToEur(count int) float32 {
-	return USD * float32(count)
+func usdToEur(count int) float64 {
+	return USDtoEUR * float64(count)
 }
-func usdToRub(c int) float32 {
-	return EUR * float32(c)
+func usdToRub(c int) float64 {
+	return USDtoRUB * float64(c)
 }
-func eurToRub(c int) float32 {
-	return usdToRub(c) / usdToEur(c)
+func eurToRub(c int) float64 {
+	return (usdToRub(c) / usdToEur(c)) * float64(c)
+}
+func getMenu() {
+	fmt.Println("_____Currency callulator______")
+	fmt.Println("Выберите пункт меню чтобы продолжить:")
+	fmt.Println("1. Поменять валюту")
+	fmt.Println("2. Выход")
+	var menuInput string
+	fmt.Scan(&menuInput)
+	for {
+		var err error
+		if menuInput == "1" {
+			_, _, _, err = getUserInput()
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+		} else if menuInput == "2" {
+			panic("Вы вышли из программы")
+		}
+		break
+
+	}
+
+}
+func getUserInput() (float64, string, string, error) {
+	var count float64
+	var src, dstCurrency string
+	var err error
+	for {
+		fmt.Println("Введите валюту которую отдаете usd/eur")
+		fmt.Scan(&src)
+		switch src {
+		case "usd":
+			{
+				dstCurrency, err = getDstCurrency(src, []string{"rub", "eur"})
+				if err != nil {
+					fmt.Println(err)
+					break
+				}
+			}
+		case "eur":
+			{
+				dstCurrency, err = getDstCurrency(src, []string{"rub"})
+				if err != nil {
+					fmt.Println(err)
+					break
+				}
+			}
+		default:
+			continue
+		}
+
+		for {
+			fmt.Println("Введите кол-во")
+			fmt.Scan(&count)
+			if count != 0 {
+				break
+			}
+		}
+
+		if src == "usd" {
+			switch dstCurrency {
+			case "rub":
+				printResult(src, dstCurrency, count, usdToRub(int(count)))
+			case "eur":
+				printResult(src, dstCurrency, count, usdToEur(int(count)))
+			default:
+				fmt.Println("Нет такой валюты для конвертации")
+			}
+		} else if src == "eur" {
+			switch dstCurrency {
+			case "rub":
+				printResult(src, dstCurrency, count, eurToRub(int(count)))
+			default:
+				fmt.Println("Нет такой валюты для конвертации")
+			}
+		}
+		break
+	}
+	return count, src, dstCurrency, nil
+}
+func printResult(src, dstCurrency string, count float64, result float64) {
+	fmt.Printf("Вы конвертируете %s в кол-ве %v в %.2f %s", src, count, result, dstCurrency)
+}
+func getDstCurrency(src string, values []string) (string, error) {
+	var dst string
+
+	for {
+		fmt.Printf("Введите валюту которую хотите получить: %s -> %v?\n", src, values)
+		fmt.Scan(&dst)
+		switch dst {
+		case "rub", "eur":
+			{
+				return dst, nil
+			}
+		default:
+			{
+				fmt.Println("Валюта выбрана некорректно")
+				continue
+			}
+		}
+	}
 }
