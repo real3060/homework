@@ -4,20 +4,25 @@ import (
 	"fmt"
 )
 
-const USDtoEUR, USDtoRUB float64 = 0.88, 80.50
+type currenciesMap = map[string]map[string]float64
+
+var currencies currenciesMap = currenciesMap{
+	"usd": {"rub": 80.50, "eur": 0.88},
+	"eur": {"rub": (80.50 / 0.88)},
+}
 
 func main() {
 	getMenu()
 }
 
 func usdToEur(count int) float64 {
-	return USDtoEUR * float64(count)
+	return currencies["usd"]["eur"] * float64(count)
 }
 func usdToRub(c int) float64 {
-	return USDtoRUB * float64(c)
+	return currencies["usd"]["rub"] * float64(c)
 }
 func eurToRub(c int) float64 {
-	return (usdToRub(c) / usdToEur(c)) * float64(c)
+	return currencies["eur"]["rub"] * float64(c)
 }
 func getMenu() {
 	fmt.Println("_____Currency callulator______")
@@ -100,7 +105,6 @@ func getUserInput() (float64, string, string, error) {
 	var err error
 	for {
 		src, dstCurrency, err = getRedeemableCurrency()
-		fmt.Println(src, dstCurrency, "after Валюту которую отдаете")
 		if src == "" && dstCurrency == "" {
 			continue
 		}
@@ -110,14 +114,13 @@ func getUserInput() (float64, string, string, error) {
 		}
 
 		count = getCurrencyCount()
-		fmt.Println(src, dstCurrency, count, "after getCurrencyCount")
 		calculateCurrency(src, dstCurrency, count)
 		break
 	}
 	return count, src, dstCurrency, nil
 }
 func printResult(src, dstCurrency string, count float64, result float64) {
-	fmt.Printf("Вы конвертируете %s в кол-ве %v в %.2f %s", src, count, result, dstCurrency)
+	fmt.Printf("Вы конвертируете %v %s в %.2f %s \n", count, src, result, dstCurrency)
 }
 func getDstCurrency(src string, values []string) (string, error) {
 	var dst string
@@ -127,9 +130,7 @@ func getDstCurrency(src string, values []string) (string, error) {
 		fmt.Scan(&dst)
 		switch dst {
 		case "rub", "eur":
-			{
-				return dst, nil
-			}
+			return dst, nil
 		default:
 			{
 				fmt.Println("Валюта выбрана некорректно")
