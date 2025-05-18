@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strings"
 )
 
 const USDtoEUR, USDtoRUB float64 = 0.88, 80.50
@@ -30,38 +32,36 @@ func getMenuInput() {
 	var menuInput string
 	fmt.Scan(&menuInput)
 	for {
-		var err error
 		if menuInput == "1" {
-			_, _, _, err = getUserInput()
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
+			getUserInput()
+			continue
 		} else if menuInput == "2" {
-			panic("Вы вышли из программы")
+			fmt.Println("Программа завершена")
+			os.Exit(0)
 		}
 		break
 
 	}
 }
-func getRedeemableCurrency() (string, string, error) {
+func getRedeemableCurrency() (string, string) {
 	var src string
 	fmt.Println("Введите валюту которую отдаете usd/eur")
 	fmt.Scan(&src)
+	src = strings.ToLower(src)
 	switch src {
 	case "usd":
 		{
-			dstCurrency, err := getDstCurrency(src, []string{"rub", "eur"})
-			return src, dstCurrency, err
+			dstCurrency := getDstCurrency(src, []string{"rub", "eur"})
+			return src, dstCurrency
 		}
 	case "eur":
 		{
-			dstCurrency, err := getDstCurrency(src, []string{"rub"})
+			dstCurrency := getDstCurrency(src, []string{"rub"})
 
-			return src, dstCurrency, err
+			return src, dstCurrency
 		}
 	default:
-		return "", "", nil
+		return "", ""
 	}
 }
 func getCurrencyCount() float64 {
@@ -94,13 +94,12 @@ func calculateCurrency(src, dstCurrency string, count float64) {
 		}
 	}
 }
-func getUserInput() (float64, string, string, error) {
+func getUserInput() (float64, string, string) {
 	var count float64
 	var src, dstCurrency string
-	var err error
 	for {
-		src, dstCurrency, err = getRedeemableCurrency()
-		fmt.Println(src, dstCurrency, "after Валюту которую отдаете")
+		var err error
+		src, dstCurrency = getRedeemableCurrency()
 		if src == "" && dstCurrency == "" {
 			continue
 		}
@@ -110,25 +109,25 @@ func getUserInput() (float64, string, string, error) {
 		}
 
 		count = getCurrencyCount()
-		fmt.Println(src, dstCurrency, count, "after getCurrencyCount")
 		calculateCurrency(src, dstCurrency, count)
 		break
 	}
-	return count, src, dstCurrency, nil
+	return count, src, dstCurrency
 }
 func printResult(src, dstCurrency string, count float64, result float64) {
 	fmt.Printf("Вы конвертируете %s в кол-ве %v в %.2f %s", src, count, result, dstCurrency)
 }
-func getDstCurrency(src string, values []string) (string, error) {
+func getDstCurrency(src string, values []string) string {
 	var dst string
 
 	for {
 		fmt.Printf("Введите валюту которую хотите получить: %s -> %v?\n", src, values)
 		fmt.Scan(&dst)
+		dst = strings.ToLower(dst)
 		switch dst {
 		case "rub", "eur":
 			{
-				return dst, nil
+				return dst
 			}
 		default:
 			{
