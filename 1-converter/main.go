@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 type currenciesMap = map[string]map[string]float64
@@ -15,15 +16,6 @@ func main() {
 	getMenu()
 }
 
-func usdToEur(count int) float64 {
-	return currencies["usd"]["eur"] * float64(count)
-}
-func usdToRub(c int) float64 {
-	return currencies["usd"]["rub"] * float64(c)
-}
-func eurToRub(c int) float64 {
-	return currencies["eur"]["rub"] * float64(c)
-}
 func getMenu() {
 	fmt.Println("_____Currency callulator______")
 	fmt.Println("Выберите пункт меню чтобы продолжить:")
@@ -53,6 +45,7 @@ func getRedeemableCurrency() (string, string, error) {
 	var src string
 	fmt.Println("Введите валюту которую отдаете usd/eur")
 	fmt.Scan(&src)
+	src = strings.ToLower(src)
 	switch src {
 	case "usd":
 		{
@@ -81,23 +74,11 @@ func getCurrencyCount() float64 {
 	return count
 }
 func calculateCurrency(src, dstCurrency string, count float64) {
-	if src == "usd" {
-		switch dstCurrency {
-		case "rub":
-			printResult(src, dstCurrency, count, usdToRub(int(count)))
-		case "eur":
-			printResult(src, dstCurrency, count, usdToEur(int(count)))
-		default:
-			fmt.Println("Нет такой валюты для конвертации")
-		}
-	} else if src == "eur" {
-		switch dstCurrency {
-		case "rub":
-			printResult(src, dstCurrency, count, eurToRub(int(count)))
-		default:
-			fmt.Println("Нет такой валюты для конвертации")
-		}
+	if _, ok := currencies[src][dstCurrency]; !ok {
+		fmt.Println("Нет такой валюты для конвертации")
+		return
 	}
+	printResult(src, dstCurrency, count, currencies[src][dstCurrency]*float64(count))
 }
 func getUserInput() (float64, string, string, error) {
 	var count float64
@@ -128,6 +109,7 @@ func getDstCurrency(src string, values []string) (string, error) {
 	for {
 		fmt.Printf("Введите валюту которую хотите получить: %s -> %v?\n", src, values)
 		fmt.Scan(&dst)
+		dst = strings.ToLower(dst)
 		switch dst {
 		case "rub", "eur":
 			return dst, nil
