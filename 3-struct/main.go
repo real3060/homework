@@ -65,8 +65,12 @@ getBin:
 		}
 		break
 	}
-	bin := bins.NewBin("", binName, isPrivate)
-	err := storage.SaveToFile(*bin)
+	bin, err := bins.NewBin("", binName, isPrivate)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	err = storage.SaveToFile(*bin)
 	if err != nil {
 		fmt.Println("не удалось сохранить в файл storage.json")
 	}
