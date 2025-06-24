@@ -1,33 +1,47 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"slices"
+	"strconv"
+	"strings"
 )
+
+var extMap = map[string]func(){
+	"avg":    avg,
+	"sum":    sumWrapper,
+	"median": med,
+}
 
 func main() {
 	for {
-
 		fmt.Println("Выберите операцию: ")
-		fmt.Println("1.AVG")
-		fmt.Println("2.SUM")
-		fmt.Println("3.Median")
-		var input int
-		fmt.Scan(&input)
-		if input <= 0 {
-			fmt.Println("Введите положительное значение")
+		fmt.Println("avg")
+		fmt.Println("sum")
+		fmt.Println("median")
+		var input string
+		fmt.Scanln(&input)
+		if input == "" {
+			fmt.Println("Значение не может быть пустой строкой")
 			continue
 		}
-		switch input {
-		case 1:
-			avg()
-		case 2:
-			sum([]int{})
-		case 3:
-			med()
-		default:
+		if _, ok := extMap[input]; !ok {
+			fmt.Println("такого значения не существует, попробуйте еще раз")
 			continue
 		}
+		extMap[input]()
+		//switch input {
+		//case 1:
+		//	avg()
+		//case 2:
+		//	sum([]int{})
+		//case 3:
+		//	med()
+		//default:
+		//	continue
+		//}
 	}
 }
 func avg() {
@@ -54,19 +68,21 @@ func sum(s []int) int {
 			summ += v
 		}
 	} else {
+		scanner := bufio.NewScanner(os.Stdin)
 		fmt.Println("Вы выбрали получение суммы")
-		var value int
 		for {
-			fmt.Println("Введите числа для рассчета, для окончания ввода нажмите 0")
-			fmt.Scan(&value)
-			if value < 0 {
-				continue
-			}
-			if value == 0 {
+			fmt.Println("Введите числа для рассчета(Enter для выхода):")
+			scanner.Scan()
+			value := scanner.Text()
+			if strings.TrimSpace(value) == "" {
 				fmt.Println("Сумма значений равна = ", summ)
 				break
 			}
-			summ += value
+			num, err := strconv.Atoi(value)
+			if err != nil || num < 0 {
+				continue
+			}
+			summ += num
 			continue
 		}
 	}
@@ -97,4 +113,8 @@ func med() {
 
 		slice = append(slice, value)
 	}
+}
+func sumWrapper() {
+	var value []int
+	fmt.Println(sum(value))
 }
